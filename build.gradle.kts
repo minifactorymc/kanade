@@ -14,7 +14,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    group = "com.sinowl"
+    group = "me.tech"
     version = "0.0.1"
 
     repositories {
