@@ -1,16 +1,18 @@
 package me.tech.factory.plot
 
 import me.tech.kanade.factory.building.FactoryBuilding
+import me.tech.kanade.factory.plot.FactoryPlot
+import me.tech.kanade.factory.plot.FactoryPlotPosition
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
 import org.bukkit.Location
 import org.litote.kmongo.Id
 
 class FactoryPlotImpl(
-    var occupant: Id<FactoryDocument>?,
-    val position: FactoryPlotPosition,
+    override var occupant: Id<FactoryDocument>?,
+    override val position: FactoryPlotPosition,
     val owningPlotSet: PlotSet
-) {
+): FactoryPlot {
     val center by lazyOf(Location(
         owningPlotSet.center.world,
         owningPlotSet.center.x + position.offset.x,

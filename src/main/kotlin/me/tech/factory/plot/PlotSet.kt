@@ -12,7 +12,13 @@ data class PlotSet(
     // TODO: 9/27/2022 make.
     val capacity: Capacity
         get() {
-            return Capacity.FULL
+            return if(plots.all { it.taken }) {
+                Capacity.FULL
+            } else if(plots.all { !it.taken })  {
+                Capacity.EMPTY
+            } else {
+                Capacity.PARTIAL
+            }
         }
 
     enum class Capacity {

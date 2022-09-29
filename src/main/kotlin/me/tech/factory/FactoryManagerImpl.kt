@@ -13,12 +13,18 @@ class FactoryManagerImpl {
     val factories: Map<Id<FactoryDocument>, FactoryImpl>
         get() = _factories
 
+    // TODO: 9/28/2022 remove?
+    val plots get() = plotManager.plotSets
+
     fun add(factory: FactoryImpl) {
         _factories[factory.id] = factory
     }
 
     fun load(document: FactoryDocument): FactoryImpl {
-        return document.toFactory()
+        val plot = plotManager.load(document.plot)
+            ?: throw NullPointerException("couldn't find valid plot")
+
+        return document.toFactory(plot)
     }
 
     fun unload(id: Id<FactoryDocument>) {

@@ -1,4 +1,4 @@
-package me.tech.factory.plot
+package me.tech.kanade.factory.plot
 
 import me.tech.mizuhara.models.Coordinates
 

@@ -1,45 +1,44 @@
 package me.tech.listeners
 
-import me.tech.factory.FactoryManagerImpl
+import kotlinx.coroutines.runBlocking
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.mongo.ProfileDocument
 import me.tech.mm
 import me.tech.profile.ProfileManagerImpl
 import me.tech.profile.toProfile
-import me.tech.servicecore.ServiceResponse
-import me.tech.servicecore.isSuccess
-import org.bukkit.Bukkit
+import me.tech.servicecore.isFailure
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import java.util.UUID
-import kotlin.contracts.contract
 
 class PlayerConnectListener(
     private val profileManager: ProfileManagerImpl
 ) : Listener {
-    private val connections = mutableMapOf<UUID, ProfileDocument>()
+    private val connections = HashMap<UUID, ProfileDocument>()
 
     @EventHandler
-    suspend fun onPlayerPreLogin(ev: AsyncPlayerPreLoginEvent) {
-        val res = MinifactoryAPI.getProfile(ev.uniqueId)
+    fun onPlayerPreLogin(ev: AsyncPlayerPreLoginEvent) {
+        runBlocking {
+            val res = MinifactoryAPI.getProfile(ev.uniqueId)
 
-        if(res is ServiceResponse.Failure) {
-            ev.disallow(
-                AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                mm.deserialize("<red>Sorry! We were unable to load your player profile at the pre-login stage, contact an administrator.")
-            )
-            return
+            if(res.isFailure()) {
+                ev.disallow(
+                    AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                    mm.deserialize("<red>Unable to fetch profile at pre-login stage, please contact an administrator.")
+                )
+                return@runBlocking
+            }
+
+            connections[ev.uniqueId] = res.data!!
         }
-
-        connections[ev.uniqueId] = res.data!!
     }
 
     @EventHandler
     fun onPlayerLogin(ev: PlayerLoginEvent) {
-        val document = connections[ev.player.uniqueId] ?: run {
-            // how'd dat hapn?
+        val uuid = ev.player.uniqueId
+        val document = connections[uuid] ?: run {
             ev.disallow(
                 PlayerLoginEvent.Result.KICK_OTHER,
                 mm.deserialize("<red>Unable to fetch profile at login stage, please contact an administrator.")
@@ -48,8 +47,8 @@ class PlayerConnectListener(
         }
 
         profileManager.add(document.toProfile())
-        // add permission attachment & call a profile loaded event.
+        // permission attachment
 
-        connections.remove(ev.player.uniqueId)
+        connections.remove(uuid)
     }
 }

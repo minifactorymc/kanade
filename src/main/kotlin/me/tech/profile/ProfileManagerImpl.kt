@@ -10,4 +10,8 @@ class ProfileManagerImpl {
     fun add(profile: ProfileImpl) {
         _profiles[profile.uuid] = profile
     }
+
+    fun remove(uuid: UUID) {
+        _profiles.remove(uuid)
+    }
 }

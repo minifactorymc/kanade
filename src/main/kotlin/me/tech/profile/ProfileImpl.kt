@@ -9,13 +9,14 @@ import java.util.UUID
 class ProfileImpl(
     val uuid: UUID,
     val rank: String,
-    val lastFactory: Id<FactoryDocument>?,
+    var lastFactory: Id<FactoryDocument>?,
     val factories: List<Id<FactoryDocument>>
 ) {
-    fun a() {
-        Bukkit.getWorld("A")
-    }
-
+    var activeFactory: Id<FactoryDocument>? = null
+        set(value) {
+            lastFactory = value
+            field = value
+        }
 }
 
 fun ProfileDocument.toProfile(): ProfileImpl {

@@ -11,30 +11,40 @@ import me.tech.utils.toCoordinates
 import me.tech.utils.toLocation
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.WorldCreator
 import org.bukkit.block.BlockFace
 import java.util.*
 
 class FactoryPlotManager {
     companion object {
-        private const val PLOT_SETS = 2
+        private const val PLOT_SETS = 3
         private const val Z_OFFSET = 250.0
 
         // TODO: 9/27/2022 SWITCH TO UID - FIXED
-        private val PLOTS_WORLD by lazyOf(Bukkit.getWorld("plots")!!)
+        private val PLOTS_WORLD by lazyOf(
+            Bukkit.createWorld(WorldCreator.name("plots"))
+                ?: throw NullPointerException("plots not found")
+        )
 
-        private val PLOT_SET_CENTER_OFFSET = Coordinates(10.0, 0.0, 10.0)
+        private val PLOT_SET_CENTER_OFFSET = Coordinates(0.0, 0.0, 250.0)
     }
 
     private val _plotSets = mutableSetOf<PlotSet>()
     val plotSets: Set<PlotSet>
         get() = Collections.unmodifiableSet(_plotSets)
 
-    fun load(document: FactoryPlotDocument) {
+    fun load(
+        document: FactoryPlotDocument
+    ): FactoryPlotImpl? {
         // TODO: 9/27/2022 throw error do smth idk
         val plot = plotSets.findSuitablePlot()
-            ?: return
+            ?: return null
 
-        loadBuildings(plot, document.buildings)
+        loadBuildings(plot, document.buildings).also {
+            plot.tickable = true
+        }
+
+        return plot
     }
 
     suspend fun saveAndUnload(factory: FactoryImpl) {
@@ -50,8 +60,7 @@ class FactoryPlotManager {
             )
         }
 
-        MinifactoryAPI.saveFactoryPlot(SavePlotRequest(
-            factory.id,
+        MinifactoryAPI.saveFactoryPlot(factory.id, SavePlotRequest(
             buildings
         ))
     }
@@ -75,8 +84,6 @@ class FactoryPlotManager {
 
             plot.buildings[location.toCoordinates()] = buildingInst
         }
-
-        plot.tickable = true
     }
 
     fun generatePlotSets() {
