@@ -9,6 +9,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
 private val buildings = mutableMapOf<String, KClass<*>>(
+    Pair("epic_conveyor", EpicConveyor::class)
 //    Pair("basic_conveyor", BasicConveyor::class),
 
 //    Pair("basic_upgrader", BasicUpgrader::class)

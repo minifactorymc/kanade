@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
 import me.tech.commands.admin.LoadFactoryFromIdCommand
+import me.tech.commands.admin.PreGeneratePlotSetsCommand
 import me.tech.factory.FactoryManagerImpl
 import me.tech.listeners.PlayerConnectListener
 import me.tech.listeners.PlayerJoinListener
@@ -58,8 +59,7 @@ class Kanade : SuspendingJavaPlugin() {
         })
 
         getCommand("loadfactoryfromid")?.setSuspendingExecutor(LoadFactoryFromIdCommand(this))
-
-
+        getCommand("pregenerateplotsets")?.setSuspendingExecutor(PreGeneratePlotSetsCommand())
 
         listOf(
             PlayerJoinListener(profileManager, factoryManager),

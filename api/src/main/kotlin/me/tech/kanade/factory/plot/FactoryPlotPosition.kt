@@ -7,12 +7,12 @@ enum class FactoryPlotPosition(
     private val z: Double
 ) {
     // PlotSet faces north.
-    TOP_LEFT(-16.0, -16.0),
+    TOP_LEFT(-17.0, -17.0),
     TOP_RIGHT(16.0, -16.0),
 
-    BOTTOM_LEFT(-16.0, 16.0),
-    BOTTOM_RIGHT(16.0, 16.0);
+    BOTTOM_LEFT(-17.0, 17.0),
+    BOTTOM_RIGHT(17.0, 17.0);
 
     val offset: Coordinates
-        get() = Coordinates(x, 0.0, z)
+        get() = Coordinates(x, 3.0, z)
 }

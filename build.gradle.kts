@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
@@ -22,7 +20,6 @@ allprojects {
         mavenLocal()
 
         maven("https://repo.purpurmc.org/snapshots")
-        maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://repo.codemc.org/repository/maven-public/")
     }
 
@@ -52,11 +49,7 @@ dependencies {
 
     implementation("net.kyori", "adventure-api", "4.11.0")
 
-
-    implementation(platform("com.intellectualsites.bom:bom-1.18.x:1.15"))
-    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
-    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit") { isTransitive = false }
-//    compileOnly("com.github.shynixn.structureblocklib", "structureblocklib-bukkit-api", "2.8.0")
+    compileOnly("com.github.shynixn.structureblocklib", "structureblocklib-bukkit-api", "2.8.0")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
 }
@@ -68,12 +61,13 @@ bukkit {
     main = "me.tech.Kanade"
     apiVersion = "1.19"
     libraries = listOf(
-//        "com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.8.0",
-//        "com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.8.0"
+        "com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.8.0",
+        "com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.8.0"
     )
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD
     commands {
         register("world")
         register("loadfactoryfromid")
+        register("pregenerateplotsets")
     }
 }
