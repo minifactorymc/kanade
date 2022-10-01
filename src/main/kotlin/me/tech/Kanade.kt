@@ -11,6 +11,8 @@ import me.tech.listeners.BlockPlaceListener
 import me.tech.listeners.PlayerConnectListener
 import me.tech.listeners.PlayerJoinListener
 import me.tech.listeners.PlayerQuitListener
+import me.tech.mizuhara.MinifactoryAPI
+import me.tech.mizuhara.models.requests.profile.SaveProfileInfoRequest
 import me.tech.profile.ProfileManagerImpl
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
@@ -74,6 +76,20 @@ class Kanade : SuspendingJavaPlugin() {
             BlockPlaceListener(profileManager, factoryManager)
         ).forEach {
             server.pluginManager.registerEvents(it, this)
+        }
+    }
+
+    override suspend fun onDisableAsync() {
+        profileManager.profiles.forEach { (_, profile) ->
+            run {
+                MinifactoryAPI.saveProfileInformation(profile.uuid, SaveProfileInfoRequest(profile.activeFactory))
+            }
+        }
+
+        factoryManager.factories.forEach { (_, factory) ->
+            run {
+                factoryManager.save(factory)
+            }
         }
     }
 }

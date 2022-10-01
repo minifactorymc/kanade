@@ -14,6 +14,12 @@ class FactoryPlotImpl(
     override val position: FactoryPlotPosition,
     val owningPlotSet: PlotSet
 ): FactoryPlot {
+    companion object {
+        private const val BOUNDS_X = 12.5
+        private const val BOUNDS_Y = 10.0
+        private const val BOUNDS_Z = 12.5
+    }
+
     val center by lazyOf(Location(
         owningPlotSet.center.world,
         owningPlotSet.center.x + position.offset.x,
@@ -21,7 +27,10 @@ class FactoryPlotImpl(
         owningPlotSet.center.z + position.offset.z
     ))
 
-    override val boundingBox = BoundingBox.of(center, position.offset.x, 10.0, position.offset.z)
+    override val boundingBox = BoundingBox.of(
+        center,
+        BOUNDS_X, BOUNDS_Y, BOUNDS_Z
+    )
 
     val buildings = mutableMapOf<Coordinates, FactoryBuilding>()
 

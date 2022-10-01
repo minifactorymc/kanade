@@ -37,9 +37,17 @@ class LoadFactoryFromIdCommand(
             return true
         }
 
-        factory.plot.buildings.forEach { (t, building) ->
-            sender.sendMessage("Coordinates = ${building.position} // StructId = ${building.structureId}")
+        if(args.isNotEmpty()) {
+            factory.plot.buildings.clear()
+            sender.sendMessage("done")
+            return true
         }
+
+        factory.plot.buildings.forEach { (t, building) ->
+            sender.sendMessage("Bounds = ${building.boundingBox}")
+        }
+
+//        sender.sendMessage(factory.boundingBox.toString())
 
         return true
     }

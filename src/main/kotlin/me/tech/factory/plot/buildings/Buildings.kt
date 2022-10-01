@@ -10,7 +10,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
 private val buildings = mutableMapOf<String, KClass<*>>(
-    Pair("epic_conveyor", EpicConveyor::class)
+    Pair("epic_conveyor", EpicConveyor::class),
+    Pair("cool_conveyor", CoolConveyor::class)
 //    Pair("basic_conveyor", BasicConveyor::class),
 
 //    Pair("basic_upgrader", BasicUpgrader::class)
@@ -35,6 +36,6 @@ fun createBuildingInstance(
         ?.call(coordinates, connections, facing) as? FactoryBuilding
         ?: return null
 
-    inst.boundingBox = inst.structureBounds.toBoundingBox(location)
+    inst.boundingBox = inst.structureBounds.toBoundingBox(location.toCenterLocation())
     return inst
 }

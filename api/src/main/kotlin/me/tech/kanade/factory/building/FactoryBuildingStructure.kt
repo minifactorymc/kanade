@@ -9,19 +9,20 @@ enum class FactoryBuildingStructure(
     val structureId: String,
     val bounds: Bounds
 ) {
-    EPIC_CONVEYOR("epic_conveyor", Bounds.THREE);
+    EPIC_CONVEYOR("epic_conveyor", Bounds.THREE),
+    COOL_CONVEYOR("cool_conveyor", Bounds.ONE);
 
     enum class Bounds(
         private val x: Double,
         private val y: Double,
         private val z: Double
     ) {
-        ONE(0.0, 1.0, 0.0),
-        THREE(1.5, 1.0, 1.5),
-        FIVE(2.5, 1.0, 2.5);
+        ONE(0.0, 3.0, 0.0),
+        THREE(1.5, 3.0, 1.5),
+        FIVE(2.5, 3.0, 2.5);
 
         fun toBoundingBox(center: Location): BoundingBox {
-            return BoundingBox.of(center, x, y, z)
+            return BoundingBox.of(center.toCenterLocation(), x, y, z)
         }
 
         // TODO: 10/1/2022 please fix this oh my god hat the hell did i write this is dreadful
