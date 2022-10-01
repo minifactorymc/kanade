@@ -14,7 +14,9 @@ class ProfileImpl(
 ) {
     var activeFactory: Id<FactoryDocument>? = null
         set(value) {
-            lastFactory = value
+            if(value != null) {
+                lastFactory = value
+            }
             field = value
         }
 }

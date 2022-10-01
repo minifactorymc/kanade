@@ -2,6 +2,7 @@ package me.tech.kanade.factory
 
 import me.tech.kanade.factory.plot.FactoryPlot
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
+import org.bukkit.util.BoundingBox
 import org.litote.kmongo.Id
 import java.util.*
 

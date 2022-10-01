@@ -6,6 +6,7 @@ import me.tech.kanade.factory.plot.FactoryPlotPosition
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
 import org.bukkit.Location
+import org.bukkit.util.BoundingBox
 import org.litote.kmongo.Id
 
 class FactoryPlotImpl(
@@ -19,6 +20,8 @@ class FactoryPlotImpl(
         owningPlotSet.center.y + position.offset.y,
         owningPlotSet.center.z + position.offset.z
     ))
+
+    override val boundingBox = BoundingBox.of(center, position.offset.x, 10.0, position.offset.z)
 
     val buildings = mutableMapOf<Coordinates, FactoryBuilding>()
 

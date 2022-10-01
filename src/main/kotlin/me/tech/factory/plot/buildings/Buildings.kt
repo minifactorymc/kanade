@@ -5,6 +5,7 @@ import me.tech.kanade.factory.building.FactoryBuildingConnections
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.Location
 import org.bukkit.block.BlockFace
+import org.bukkit.util.BoundingBox
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
@@ -30,6 +31,10 @@ fun createBuildingInstance(
     )
     val connections = FactoryBuildingConnections.fromLocation(location, facing)
 
-    return building.primaryConstructor
+    val inst = building.primaryConstructor
         ?.call(coordinates, connections, facing) as? FactoryBuilding
+        ?: return null
+
+    inst.boundingBox = inst.structureBounds.toBoundingBox(location)
+    return inst
 }

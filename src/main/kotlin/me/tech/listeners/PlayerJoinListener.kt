@@ -52,7 +52,7 @@ class PlayerJoinListener(
 
             val factory = factoryManager.load(res.data!!)
             profile.activeFactory = factory.id
-            player.teleport(factory.plot.center)
+            factory.teleportToPlot(player)
         }
     }
 
@@ -85,7 +85,7 @@ class PlayerJoinListener(
 
         // tmp
         profile.activeFactory = factory.id
-        player.teleport(factory.plot.center)
+        factory.teleportToPlot(player)
 
         return true
     }

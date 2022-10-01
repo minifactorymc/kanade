@@ -1,9 +1,12 @@
 package me.tech.factory
 
 import me.tech.factory.plot.FactoryPlotManager
-import me.tech.mizuhara.MinifactoryAPI
+import me.tech.factory.plot.buildings.createBuildingInstance
+import me.tech.kanade.factory.building.FactoryBuildingStructure
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
-import me.tech.mizuhara.models.requests.factory.plot.SavePlotRequest
+import me.tech.utils.toCoordinates
+import org.bukkit.Location
+import org.bukkit.block.BlockFace
 import org.litote.kmongo.Id
 
 class FactoryManagerImpl {
@@ -20,11 +23,18 @@ class FactoryManagerImpl {
         _factories[factory.id] = factory
     }
 
+    fun remove(id: Id<FactoryDocument>) {
+        _factories.remove(id)
+    }
+
     fun load(document: FactoryDocument): FactoryImpl {
         val plot = plotManager.load(document.plot)
             ?: throw NullPointerException("couldn't find valid plot")
 
-        return document.toFactory(plot)
+        val factory = document.toFactory(plot)
+
+        add(factory)
+        return factory
     }
 
     fun unload(id: Id<FactoryDocument>) {
@@ -32,6 +42,23 @@ class FactoryManagerImpl {
 
     suspend fun save(factory: FactoryImpl) {
         plotManager.saveAndUnload(factory)
+    }
+
+    fun loadBuilding(
+        factory: FactoryImpl,
+        location: Location,
+        facing: BlockFace,
+        id: String
+    ): Boolean {
+        return if(plotManager.loadStructure(factory.plot, location, facing, FactoryBuildingStructure.valueOf(id.uppercase()))) {
+            factory.plot.buildings[location.toCoordinates()] = createBuildingInstance(id, location, facing)
+                ?: throw RuntimeException("unable to create building instance $id.")
+
+            true
+        } else {
+            false
+        }
+//        return plotManager.loadStructure(plot, location, facing, structure, false)
     }
 
     fun generatePlotSets() {

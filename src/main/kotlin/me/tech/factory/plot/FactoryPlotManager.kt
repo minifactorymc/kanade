@@ -5,6 +5,8 @@ import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation
 import me.tech.Kanade
 import me.tech.factory.FactoryImpl
 import me.tech.factory.plot.buildings.createBuildingInstance
+import me.tech.kanade.factory.building.FactoryBuilding
+import me.tech.kanade.factory.building.FactoryBuildingStructure
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotBuildingDocument
@@ -29,7 +31,7 @@ class FactoryPlotManager {
         // TODO: 9/27/2022 SWITCH TO UID - FIXED
         private val PLOTS_WORLD by lazyOf(
             Bukkit.createWorld(WorldCreator.name("plots"))
-                ?: throw NullPointerException("plots not found")
+                ?: throw NullPointerException("plots world not found")
         )
 
         private val PLOT_SET_CENTER_OFFSET = Coordinates(30.0, 0.0, 30.0)
@@ -67,7 +69,7 @@ class FactoryPlotManager {
         val buildings = factory.plot.buildings.map {
             FactoryPlotBuildingDocument(
                 it.value.structureId,
-                it.key.toLocation(PLOTS_WORLD).clone().subtract(factory.plot.owningPlotSet.center).toCoordinates(),
+                it.key.toLocation(PLOTS_WORLD).clone().subtract(factory.plot.center).toCoordinates(),
                 it.value.facing.name.uppercase()
             )
         }
@@ -75,6 +77,54 @@ class FactoryPlotManager {
         MinifactoryAPI.saveFactoryPlot(factory.id, SavePlotRequest(
             buildings
         ))
+    }
+
+    fun loadStructure(
+        plot: FactoryPlotImpl,
+        location: Location,
+        facing: BlockFace,
+        structure: FactoryBuildingStructure,
+        force: Boolean = false
+    ): Boolean {
+        val structureBoundingBox = structure.bounds.toBoundingBox(location)
+
+        // TODO: 10/1/2022 buildings can still sometimes overlap, fix eventually.
+        if(!force) {
+            if(!plot.boundingBox.contains(structureBoundingBox)) {
+                Bukkit.broadcastMessage("Outside plot.")
+                return false
+            }
+
+            val intersectsAnyBuilding = plot.buildings.any { (_, building) ->
+                structureBoundingBox.overlaps(building.boundingBox)
+            }
+
+            if(intersectsAnyBuilding) {
+                Bukkit.broadcastMessage("Intersects building.")
+                return false
+            }
+        }
+
+        val rotation = when(facing) {
+            BlockFace.NORTH -> StructureRotation.NONE
+            BlockFace.EAST -> StructureRotation.ROTATION_90
+            BlockFace.SOUTH -> StructureRotation.ROTATION_180
+            BlockFace.WEST -> StructureRotation.ROTATION_270
+            else -> StructureRotation.NONE
+        }
+
+        val offset = structure.bounds.getStructureOffset(facing)
+
+        structureLoader
+            .rotation(rotation)
+            .at(location.clone().add(offset.x, offset.y, offset.z))
+            // TODO: 9/29/2022 Cache the files so we dont need to keep creating an inst.
+            .loadFromFile(File(dataFolder, "structures/buildings/${structure.structureId}"))
+            .onException { throwable ->
+                throwable.printStackTrace()
+            }
+
+        return true
     }
 
     private fun loadBuildings(
@@ -85,13 +135,13 @@ class FactoryPlotManager {
             return
         }
 
-        data class PendingBuilding(
+        data class PendingStructure(
             val location: Location,
             val facing: BlockFace,
             val structureId: String
         )
 
-        val pending = mutableListOf<PendingBuilding>()
+        val pending = mutableListOf<PendingStructure>()
         for(building in buildings) {
             val structureId = building.structureId
             val location = plot.center
@@ -99,7 +149,7 @@ class FactoryPlotManager {
                 .add(building.offset.toLocation(PLOTS_WORLD))
             val facing = BlockFace.valueOf(building.facing)
 
-            pending.add(PendingBuilding(
+            pending.add(PendingStructure(
                 location,
                 facing,
                 structureId
@@ -113,24 +163,21 @@ class FactoryPlotManager {
         }
 
         thread {
-            pending.forEach {
-                val (location, facing, structureId) = it
-                val rotation = when(facing) {
-                    BlockFace.NORTH -> StructureRotation.NONE
-                    BlockFace.EAST -> StructureRotation.ROTATION_90
-                    BlockFace.SOUTH -> StructureRotation.ROTATION_180
-                    BlockFace.WEST -> StructureRotation.ROTATION_270
-                    else -> StructureRotation.NONE
-                }
+            for(struct in pending) {
+                val (location, facing, structureId) = struct
 
-                structureLoader
-                    .at(location.subtract(0.0, 1.0, 0.0))
-                    .rotation(rotation)
-                    // TODO: 9/29/2022 Cache the files so we dont need to keep creating an inst.
-                    .loadFromFile(File(dataFolder, "structures/buildings/$structureId"))
-                    .onException { throwable ->
-                        throwable.printStackTrace()
-                    }
+                loadStructure(
+                    plot,
+                    location,
+                    facing,
+                    try {
+                        FactoryBuildingStructure.valueOf(structureId.uppercase())
+                    } catch(ex: IllegalArgumentException) {
+                        ex.printStackTrace()
+                        continue
+                    },
+                    true
+                )
             }
         }
     }

@@ -4,10 +4,13 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
 import me.tech.Kanade
 import me.tech.azusa.toId
 import me.tech.mizuhara.MinifactoryAPI
+import me.tech.mizuhara.models.mongo.factory.FactoryDocument
 import org.bson.types.ObjectId
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.util.BoundingBox
 
 class LoadFactoryFromIdCommand(
     private val plugin: Kanade
@@ -25,13 +28,18 @@ class LoadFactoryFromIdCommand(
             return true
         }
 
-        if(args.isEmpty()) {
-            sender.sendMessage("where da id :(")
+        val profile = profileManager.profiles[sender.uniqueId]
+            ?: return true
+
+        val factory = factoryManager.factories[profile.activeFactory]
+        if(factory == null) {
+            sender.sendMessage("Invalid factory.")
             return true
         }
 
-        val fac = MinifactoryAPI.getFactory(ObjectId(args[0]).toId())
-        sender.sendMessage(fac.data!!.toString())
+        factory.plot.buildings.forEach { (t, building) ->
+            sender.sendMessage("Coordinates = ${building.position} // StructId = ${building.structureId}")
+        }
 
         return true
     }
