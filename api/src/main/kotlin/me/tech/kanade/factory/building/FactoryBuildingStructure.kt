@@ -2,6 +2,7 @@ package me.tech.kanade.factory.building
 
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.util.BoundingBox
 
@@ -10,7 +11,7 @@ enum class FactoryBuildingStructure(
     val bounds: Bounds
 ) {
     EPIC_CONVEYOR("epic_conveyor", Bounds.THREE),
-    COOL_CONVEYOR("cool_conveyor", Bounds.ONE);
+    COOL_CONVEYOR("cool_conveyor", Bounds.THREE);
 
     enum class Bounds(
         private val x: Double,
@@ -34,28 +35,28 @@ enum class FactoryBuildingStructure(
             val coords: Coordinates? = when(facing) {
                 BlockFace.NORTH -> {
                     if(this == THREE) {
-                        Coordinates(-1.0, 0.0, -1.0)
+                        Coordinates(-1.0, 0.0, 1.0)
                     } else {
                         null
                     }
                 }
                 BlockFace.WEST -> {
                     if(this == THREE) {
-                        Coordinates(-1.0, 0.0, 1.0)
+                        Coordinates(1.0, 0.0, 1.0)
                     } else {
                         null
                     }
                 }
                 BlockFace.SOUTH -> {
                     if(this == THREE) {
-                        Coordinates(1.0, 0.0, 1.0)
+                        Coordinates(1.0, 0.0, -1.0)
                     } else {
                         null
                     }
                 }
                 BlockFace.EAST -> {
                     if(this == THREE) {
-                        Coordinates(1.0, 0.0, -1.0)
+                        Coordinates(-1.0, 0.0, -1.0)
                     } else {
                         null
                     }

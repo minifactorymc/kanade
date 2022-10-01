@@ -1,6 +1,8 @@
+val kotlinVersion: String by project
+
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
     id("net.minecrell.plugin-yml.bukkit") version "0.5.2"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
@@ -51,7 +53,7 @@ dependencies {
 
     compileOnly("com.github.shynixn.structureblocklib", "structureblocklib-bukkit-api", "2.8.0")
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 }
 
 bukkit {
@@ -69,5 +71,6 @@ bukkit {
         register("world")
         register("loadfactoryfromid")
         register("pregenerateplotsets")
+        register("generatetestitem")
     }
 }

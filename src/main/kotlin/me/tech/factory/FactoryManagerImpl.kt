@@ -3,6 +3,7 @@ package me.tech.factory
 import me.tech.factory.plot.FactoryPlotManager
 import me.tech.factory.plot.buildings.createBuildingInstance
 import me.tech.kanade.factory.building.FactoryBuildingStructure
+import me.tech.kanade.factory.building.StructureLoadResult
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
 import me.tech.utils.toCoordinates
 import org.bukkit.Location
@@ -49,16 +50,20 @@ class FactoryManagerImpl {
         location: Location,
         facing: BlockFace,
         id: String
-    ): Boolean {
-        return if(plotManager.loadStructure(factory.plot, location, facing, FactoryBuildingStructure.valueOf(id.uppercase()))) {
-            factory.plot.buildings[location.toCoordinates()] = createBuildingInstance(id, location, facing)
-                ?: throw RuntimeException("unable to create building instance $id.")
+    ): StructureLoadResult {
+        val plot = factory.plot
+        val result = plotManager.loadStructure(
+            plot,
+            location,
+            facing,
+            FactoryBuildingStructure.valueOf(id.uppercase())
+        )
 
-            true
-        } else {
-            false
+        if(result.isSuccess()) {
+            plot.buildings[location.toCoordinates()] = createBuildingInstance(id, location, facing)
+                ?: throw RuntimeException("unable to create instance of building $id.")
         }
-//        return plotManager.loadStructure(plot, location, facing, structure, false)
+        return result
     }
 
     fun generatePlotSets() {

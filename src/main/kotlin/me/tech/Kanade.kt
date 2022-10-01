@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
+import me.tech.commands.admin.GenerateTestItemCommand
 import me.tech.commands.admin.LoadFactoryFromIdCommand
 import me.tech.commands.admin.PreGeneratePlotSetsCommand
 import me.tech.factory.FactoryManagerImpl
@@ -11,6 +12,7 @@ import me.tech.listeners.BlockPlaceListener
 import me.tech.listeners.PlayerConnectListener
 import me.tech.listeners.PlayerJoinListener
 import me.tech.listeners.PlayerQuitListener
+import me.tech.listeners.admin.BuildingWandListener
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.requests.profile.SaveProfileInfoRequest
 import me.tech.profile.ProfileManagerImpl
@@ -61,6 +63,7 @@ class Kanade : SuspendingJavaPlugin() {
 
         })
 
+        getCommand("generatetestitem")?.setExecutor(GenerateTestItemCommand())
         getCommand("loadfactoryfromid")?.setSuspendingExecutor(LoadFactoryFromIdCommand(this))
         getCommand("pregenerateplotsets")?.setSuspendingExecutor(PreGeneratePlotSetsCommand())
 
@@ -73,7 +76,8 @@ class Kanade : SuspendingJavaPlugin() {
 
         listOf(
             PlayerConnectListener(profileManager),
-            BlockPlaceListener(profileManager, factoryManager)
+            BlockPlaceListener(profileManager, factoryManager),
+            BuildingWandListener(this)
         ).forEach {
             server.pluginManager.registerEvents(it, this)
         }

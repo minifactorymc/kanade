@@ -5,8 +5,8 @@ import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation
 import me.tech.Kanade
 import me.tech.factory.FactoryImpl
 import me.tech.factory.plot.buildings.createBuildingInstance
-import me.tech.kanade.factory.building.FactoryBuilding
 import me.tech.kanade.factory.building.FactoryBuildingStructure
+import me.tech.kanade.factory.building.StructureLoadResult
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotBuildingDocument
@@ -18,6 +18,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.WorldCreator
 import org.bukkit.block.BlockFace
+import org.bukkit.block.data.Directional
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
@@ -85,14 +86,13 @@ class FactoryPlotManager {
         facing: BlockFace,
         structure: FactoryBuildingStructure,
         force: Boolean = false
-    ): Boolean {
+    ): StructureLoadResult {
         val structureBoundingBox = structure.bounds.toBoundingBox(location)
 
         // TODO: 10/1/2022 buildings can still sometimes overlap, fix eventually.
         if(!force) {
             if(!plot.boundingBox.contains(structureBoundingBox)) {
-                Bukkit.broadcastMessage("Outside plot.")
-                return false
+                return StructureLoadResult.OUTSIDE_PLOT
             }
 
             val intersectsAnyBuilding = plot.buildings.any { (_, building) ->
@@ -100,16 +100,15 @@ class FactoryPlotManager {
             }
 
             if(intersectsAnyBuilding) {
-                Bukkit.broadcastMessage("Intersects building.")
-                return false
+                return StructureLoadResult.INTERSECTING
             }
         }
 
         val rotation = when(facing) {
-            BlockFace.NORTH -> StructureRotation.NONE
-            BlockFace.EAST -> StructureRotation.ROTATION_90
-            BlockFace.SOUTH -> StructureRotation.ROTATION_180
-            BlockFace.WEST -> StructureRotation.ROTATION_270
+            BlockFace.NORTH -> StructureRotation.ROTATION_270
+            BlockFace.EAST -> StructureRotation.NONE
+            BlockFace.SOUTH -> StructureRotation.ROTATION_90
+            BlockFace.WEST -> StructureRotation.ROTATION_180
             else -> StructureRotation.NONE
         }
 
@@ -124,7 +123,7 @@ class FactoryPlotManager {
                 throwable.printStackTrace()
             }
 
-        return true
+        return StructureLoadResult.SUCCESS
     }
 
     private fun loadBuildings(
