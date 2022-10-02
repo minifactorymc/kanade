@@ -1,4 +1,4 @@
-package me.tech.utils
+package me.tech.kanade.utils
 
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.Location

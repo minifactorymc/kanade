@@ -1,6 +1,7 @@
 package me.tech.commands.admin
 
 import io.github.bananapuncher714.nbteditor.NBTEditor
+import me.tech.translator
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -16,6 +17,7 @@ class GenerateTestItemCommand : CommandExecutor {
         args: Array<out String>?
     ): Boolean {
         if(!sender.hasPermission("core.admin") || sender !is Player) {
+            translator.send(sender, "core.invalid_permissions")
             return true
         }
 

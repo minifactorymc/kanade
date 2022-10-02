@@ -13,4 +13,6 @@ interface FactoryPlot {
     val boundingBox: BoundingBox
 
     val center: Location
+
+    fun tickBuildings()
 }

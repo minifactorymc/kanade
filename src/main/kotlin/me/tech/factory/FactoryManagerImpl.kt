@@ -2,10 +2,11 @@ package me.tech.factory
 
 import me.tech.factory.plot.FactoryPlotManager
 import me.tech.factory.plot.buildings.createBuildingInstance
+import me.tech.factory.plot.buildings.getImaginaryConveyorLocations
 import me.tech.kanade.factory.building.FactoryBuildingStructure
 import me.tech.kanade.factory.building.StructureLoadResult
+import me.tech.kanade.utils.toCoordinates
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
-import me.tech.utils.toCoordinates
 import org.bukkit.Location
 import org.bukkit.block.BlockFace
 import org.litote.kmongo.Id
@@ -60,8 +61,10 @@ class FactoryManagerImpl {
         )
 
         if(result.isSuccess()) {
-            plot.buildings[location.toCoordinates()] = createBuildingInstance(id, location, facing)
+            val inst = createBuildingInstance(id, location, facing)
                 ?: throw RuntimeException("unable to create instance of building $id.")
+
+            plot.addBuildingInstance(inst)
         }
         return result
     }

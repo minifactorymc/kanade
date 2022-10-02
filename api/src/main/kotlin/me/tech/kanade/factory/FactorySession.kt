@@ -14,4 +14,6 @@ interface FactorySession {
     val team: List<FactoryProfile>
 
     val plot: FactoryPlot
+
+    fun tick()
 }

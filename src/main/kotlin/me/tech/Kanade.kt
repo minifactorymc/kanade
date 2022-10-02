@@ -6,15 +6,9 @@ import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
 import me.tech.anya.Translator
 import me.tech.anya.getLanguageProviderRegistration
-import me.tech.commands.admin.GenerateTestItemCommand
-import me.tech.commands.admin.LoadFactoryFromIdCommand
-import me.tech.commands.admin.PreGeneratePlotSetsCommand
-import me.tech.commands.admin.SaveNewStructureCommand
+import me.tech.commands.admin.*
 import me.tech.factory.FactoryManagerImpl
-import me.tech.listeners.BlockPlaceListener
-import me.tech.listeners.PlayerConnectListener
-import me.tech.listeners.PlayerJoinListener
-import me.tech.listeners.PlayerQuitListener
+import me.tech.listeners.*
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.requests.profile.SaveProfileInfoRequest
 import me.tech.profile.ProfileManagerImpl
@@ -24,6 +18,7 @@ import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 
 class Kanade : SuspendingJavaPlugin() {
     lateinit var translator: Translator
@@ -35,16 +30,13 @@ class Kanade : SuspendingJavaPlugin() {
     lateinit var factoryManager: FactoryManagerImpl
         private set
 
-    override suspend fun onLoadAsync() {
+    override suspend fun onEnableAsync() {
         translator = Translator(
             mm,
             getLanguageProviderRegistration(server.servicesManager)
         )
-
         translator.loadMessages(this)
-    }
 
-    override suspend fun onEnableAsync() {
         profileManager = ProfileManagerImpl()
         factoryManager = FactoryManagerImpl()
 
@@ -81,6 +73,7 @@ class Kanade : SuspendingJavaPlugin() {
         getCommand("loadfactoryfromid")?.setSuspendingExecutor(LoadFactoryFromIdCommand(this))
         getCommand("pregenerateplotsets")?.setSuspendingExecutor(PreGeneratePlotSetsCommand())
         getCommand("savenewstructure")?.setExecutor(SaveNewStructureCommand(this))
+        getCommand("senditem")?.setExecutor(SendItemCommand(this))
 
         listOf(
             PlayerJoinListener(profileManager, factoryManager),
@@ -91,7 +84,8 @@ class Kanade : SuspendingJavaPlugin() {
 
         listOf(
             PlayerConnectListener(profileManager),
-            BlockPlaceListener(profileManager, factoryManager)
+            BlockPlaceListener(profileManager, factoryManager),
+            ServerTickListener(factoryManager)
         ).forEach {
             server.pluginManager.registerEvents(it, this)
         }
@@ -111,6 +105,9 @@ class Kanade : SuspendingJavaPlugin() {
         }
     }
 }
+
+val translator: Translator
+    get() = JavaPlugin.getPlugin(Kanade::class.java).translator
 
 val mm = MiniMessage
     .builder()

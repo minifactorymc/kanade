@@ -7,16 +7,15 @@ import me.tech.factory.FactoryImpl
 import me.tech.factory.plot.buildings.createBuildingInstance
 import me.tech.kanade.factory.building.FactoryBuildingStructure
 import me.tech.kanade.factory.building.StructureLoadResult
+import me.tech.kanade.utils.toCoordinates
+import me.tech.kanade.utils.toLocation
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotBuildingDocument
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotDocument
 import me.tech.mizuhara.models.requests.factory.plot.SavePlotRequest
-import me.tech.utils.toCoordinates
-import me.tech.utils.toLocation
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.WorldCreator
 import org.bukkit.block.BlockFace
 import org.bukkit.plugin.java.JavaPlugin
@@ -93,6 +92,11 @@ class FactoryPlotManager {
         structure: FactoryBuildingStructure,
         force: Boolean = false
     ): StructureLoadResult {
+        // Internal use only.
+        if(structure.structureId.equals("imaginary", true)) {
+            return StructureLoadResult.EXCEPTION
+        }
+
         val structureBoundingBox = structure.bounds.toBoundingBox(location)
 
         // TODO: 10/1/2022 buildings can still sometimes overlap, fix eventually.
@@ -153,6 +157,11 @@ class FactoryPlotManager {
         val pending = mutableListOf<PendingStructure>()
         for(building in buildings) {
             val structureId = building.structureId
+            // Internal use only.
+            if(structureId.equals("imaginary", true)) {
+                continue
+            }
+
             val location = plot.center
                 .clone()
                 .add(building.offset.toLocation(PLOTS_WORLD))
@@ -168,7 +177,7 @@ class FactoryPlotManager {
             val buildingInst = createBuildingInstance(structureId, location, facing)
                 ?: continue
 
-            plot.buildings[location.toCoordinates()] = buildingInst
+            plot.addBuildingInstance(buildingInst)
         }
 
         thread {

@@ -1,16 +1,21 @@
 package me.tech.factory.plot
 
+import me.tech.factory.plot.buildings.ImaginaryConveyor
+import me.tech.factory.plot.buildings.getImaginaryConveyorLocations
 import me.tech.kanade.factory.building.FactoryBuilding
+import me.tech.kanade.factory.building.FactoryBuildingConnections
+import me.tech.kanade.factory.building.types.FactoryBuildingMovable
 import me.tech.kanade.factory.plot.FactoryPlot
 import me.tech.kanade.factory.plot.FactoryPlotPosition
+import me.tech.kanade.utils.toCoordinates
+import me.tech.kanade.utils.toLocation
 import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.FactoryDocument
+import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
-import org.bukkit.block.Block
 import org.bukkit.util.BoundingBox
 import org.litote.kmongo.Id
+import java.util.*
 
 
 class FactoryPlotImpl(
@@ -33,24 +38,103 @@ class FactoryPlotImpl(
     override val center: Location
         get() = _center.clone()
 
+    private val plotsWorld get() = center.world
+
     override val boundingBox = BoundingBox.of(
         center,
         BOUNDS_X, BOUNDS_Y, BOUNDS_Z
     )
 
-    val buildings = mutableMapOf<Coordinates, FactoryBuilding>()
+    // TODO: 10/2/2022 I converted the private fields to sets and just turn them
+    // into maps, need to still test the performance of this.
+
+    private val _buildings = mutableListOf<FactoryBuilding>()
+    val buildings: Map<Coordinates, FactoryBuilding>
+        get() = _buildings.associateBy { it.position }
+
+    private val _imaginaryConveyors = mutableListOf<ImaginaryConveyor>()
+    val imaginaryConveyors: Map<Coordinates, ImaginaryConveyor>
+        get() = _imaginaryConveyors.associateBy { it.position }
+
+    val allBuildings: Map<Coordinates, FactoryBuilding>
+        get() = buildings + imaginaryConveyors
 
     val taken: Boolean
         get() = occupant != null
 
     var tickable = false
 
+    fun addBuildingInstance(building: FactoryBuilding) {
+        _buildings.add(building)
+
+        if(building is FactoryBuildingMovable) {
+            setupImaginaryConveyors(building)
+        }
+    }
+
+    fun removeBuildingInstance(coordinates: Coordinates) {
+        removeBuildingInstance(buildings[coordinates] ?: return)
+    }
+
+    fun removeBuildingInstance(building: FactoryBuilding) {
+        removeImaginaryConveyors(building)
+        _buildings.remove(building)
+//        _buildings.values.removeIf { it == building }
+    }
+
+    private fun setupImaginaryConveyors(building: FactoryBuilding) {
+        val bounds = building.structureBounds
+        val location = building.position.toLocation(plotsWorld)
+        val facing = building.facing
+        val ticksToMove = (building as FactoryBuildingMovable).ticksToMove
+
+        getImaginaryConveyorLocations(bounds, location, facing).forEach {
+            _imaginaryConveyors.add(ImaginaryConveyor(
+                it.toCoordinates(),
+                FactoryBuildingConnections.fromLocation(it, facing),
+                facing,
+                ticksToMove
+            ))
+        }
+    }
+
+    private fun removeImaginaryConveyors(building: FactoryBuilding) {
+        val bounds = building.structureBounds
+        val location = building.position.toLocation(plotsWorld)
+        val facing = building.facing
+
+        getImaginaryConveyorLocations(bounds, location, facing).forEach {
+            _imaginaryConveyors.remove(imaginaryConveyors[it.toCoordinates()])
+        }
+    }
+
+    override fun tickBuildings() {
+        if(!tickable) {
+            return
+        }
+
+        for(building in allBuildings.values) {
+            // Don't tick buildings that don't have items.
+            val item = building.carriedItem
+                ?: continue
+
+            if(building is FactoryBuildingMovable) {
+                val nextBuilding = allBuildings[building.connections.next]
+
+                if(nextBuilding != null) {
+                    building.moveItemToNext(building, nextBuilding, item)
+                }
+            }
+        }
+    }
+
     fun clearPlot() {
         tickable = false
 
         // TODO: 10/1/2022 clear the plot, maybe use a void structure?
 
-        buildings.clear()
+        _buildings.clear()
+        _imaginaryConveyors.clear()
     }
 }
 

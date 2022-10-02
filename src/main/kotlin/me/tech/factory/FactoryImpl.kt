@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import org.litote.kmongo.Id
 import java.util.UUID
+import kotlin.system.measureTimeMillis
 
 class FactoryImpl(
     override val id: Id<FactoryDocument>,
@@ -17,11 +18,16 @@ class FactoryImpl(
     val boundingBox: BoundingBox
         get() = plot.boundingBox
 
+    override fun tick() {
+        val t = measureTimeMillis {  plot.tickBuildings() }
+        println("Tick took $t")
+    }
+
     // TODO: 9/30/2022 check if plot is open etc, this method will be used
     // by everything to validate whether someone can be brought to a plot then
     // actually teleport them.
     fun teleportToPlot(player: Player): Boolean {
-        player.teleport(plot.center.clone().add(0.0, 1.0, 0.0))
+        player.teleport(plot.center.add(0.0, 1.0, 0.0))
         return true
     }
 }

@@ -1,0 +1,2 @@
+core:
+  invalid_permissions: "<red>You are lacking the required permissions to execute this command."

@@ -48,7 +48,7 @@ dependencies {
     implementation("me.tech", "azusa", "0.0.1")
     implementation("org.mongodb", "bson", "4.7.1")
     compileOnly("me.tech", "service-core", "0.0.1")
-    implementation("me.tech", "anya", "0.0.1")
+    compileOnly("me.tech", "anya", "0.0.1")
 
     implementation("net.kyori", "adventure-api", "4.11.0")
 
@@ -77,5 +77,6 @@ bukkit {
         register("pregenerateplotsets")
         register("generatetestitem")
         register("savenewstructure")
+        register("senditem")
     }
 }

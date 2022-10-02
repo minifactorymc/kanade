@@ -10,7 +10,15 @@ enum class FactoryBuildingStructure(
     val structureId: String,
     val bounds: Bounds
 ) {
-    EPIC_CONVEYOR("epic_conveyor", Bounds.THREE),
+    /**
+     * @deprecated Please remove this.
+     * @internal Please do not use this whatsoever.
+     */
+    // TODO: 10/2/2022 remove
+    @Deprecated("dont touch")
+    IMAGINARY("imaginary", Bounds.ZERO),
+
+    EPIC_CONVEYOR("epic_conveyor", Bounds.ONE),
     COOL_CONVEYOR("cool_conveyor", Bounds.THREE);
 
     enum class Bounds(
@@ -18,6 +26,8 @@ enum class FactoryBuildingStructure(
         private val y: Double,
         private val z: Double
     ) {
+        // TODO: 10/2/2022 remove?
+        ZERO(0.0, 0.0, 0.0), 
         ONE(0.0, 2.0, 0.0),
         THREE(1.5, 2.0, 1.5),
         FIVE(2.5, 2.0, 2.5);

@@ -2,15 +2,18 @@ package me.tech.factory.plot.buildings
 
 import me.tech.kanade.factory.building.FactoryBuilding
 import me.tech.kanade.factory.building.FactoryBuildingConnections
+import me.tech.kanade.factory.building.types.FactoryBuildingMovable
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.block.BlockFace
 
-class CoolConveyor(
+class ImaginaryConveyor(
     position: Coordinates,
     connections: FactoryBuildingConnections,
-    facing: BlockFace
+    facing: BlockFace,
+    override val ticksToMove: Int
 ) : FactoryBuilding(
-    "cool_conveyor",
+    "imaginary",
     position, connections, facing
-) {
+), FactoryBuildingMovable {
+    override var currentTick: Int = 0
 }

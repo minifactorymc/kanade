@@ -38,13 +38,20 @@ class LoadFactoryFromIdCommand(
         }
 
         if(args.isNotEmpty()) {
-            factory.plot.buildings.clear()
-            sender.sendMessage("done")
+            if(args[0].equals("t", true)) {
+                factory.plot.tickable = true
+                sender.sendMessage("tickable true")
+            } else {
+                factory.plot.clearPlot()
+//            factory.plot.buildings.clear()
+//            factory.plot.imaginaryConveyors.clear()
+                sender.sendMessage("done")
+            }
             return true
         }
 
-        factory.plot.buildings.forEach { (t, building) ->
-            sender.sendMessage("Bounds = ${building.boundingBox}")
+        factory.plot.allBuildings.forEach { (t, building) ->
+            sender.sendMessage("Bounds = ${building.structureId} // Pos = ${building.position}")
         }
 
 //        sender.sendMessage(factory.boundingBox.toString())
