@@ -21,7 +21,7 @@ class FactoryImpl(
     // by everything to validate whether someone can be brought to a plot then
     // actually teleport them.
     fun teleportToPlot(player: Player): Boolean {
-        player.teleport(plot.center.add(0.0, 1.0, 0.0))
+        player.teleport(plot.center.clone().add(0.0, 1.0, 0.0))
         return true
     }
 }

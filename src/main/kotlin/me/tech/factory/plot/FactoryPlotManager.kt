@@ -16,9 +16,9 @@ import me.tech.utils.toCoordinates
 import me.tech.utils.toLocation
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.WorldCreator
 import org.bukkit.block.BlockFace
-import org.bukkit.block.data.Directional
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
@@ -26,7 +26,7 @@ import kotlin.concurrent.thread
 
 class FactoryPlotManager {
     companion object {
-        private const val PLOT_SETS = 3
+        private const val PLOT_SETS = 1
         private const val Z_OFFSET = 250.0
 
         // TODO: 9/27/2022 SWITCH TO UID - FIXED
@@ -35,7 +35,7 @@ class FactoryPlotManager {
                 ?: throw NullPointerException("plots world not found")
         )
 
-        private val PLOT_SET_CENTER_OFFSET = Coordinates(30.0, 0.0, 30.0)
+        private val PLOT_SET_CENTER_OFFSET = Coordinates(29.5, 0.0, 29.5)
     }
 
     private val _plotSets = mutableSetOf<PlotSet>()
@@ -68,10 +68,16 @@ class FactoryPlotManager {
         plot.tickable = false
 
         val buildings = factory.plot.buildings.map {
+            val building = it.value
+
+            val positionRelativeToCenter = building.position
+                .toLocation(PLOTS_WORLD)
+                .subtract(plot.center)
+
             FactoryPlotBuildingDocument(
-                it.value.structureId,
-                it.key.toLocation(PLOTS_WORLD).clone().subtract(factory.plot.center).toCoordinates(),
-                it.value.facing.name.uppercase()
+                building.structureId,
+                positionRelativeToCenter.toCoordinates(),
+                building.facing.name.uppercase()
             )
         }
 
@@ -91,6 +97,10 @@ class FactoryPlotManager {
 
         // TODO: 10/1/2022 buildings can still sometimes overlap, fix eventually.
         if(!force) {
+            if(location.y > plot.center.y) {
+                return StructureLoadResult.OUTSIDE_PLOT
+            }
+
             if(!plot.boundingBox.contains(structureBoundingBox)) {
                 return StructureLoadResult.OUTSIDE_PLOT
             }

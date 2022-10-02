@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "me.tech"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -48,6 +48,7 @@ dependencies {
     implementation("me.tech", "azusa", "0.0.1")
     implementation("org.mongodb", "bson", "4.7.1")
     compileOnly("me.tech", "service-core", "0.0.1")
+    implementation("me.tech", "anya", "0.0.1")
 
     implementation("net.kyori", "adventure-api", "4.11.0")
 
@@ -67,10 +68,14 @@ bukkit {
         "com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.8.0"
     )
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD
+    depend = listOf(
+        "anya"
+    )
     commands {
         register("world")
         register("loadfactoryfromid")
         register("pregenerateplotsets")
         register("generatetestitem")
+        register("savenewstructure")
     }
 }

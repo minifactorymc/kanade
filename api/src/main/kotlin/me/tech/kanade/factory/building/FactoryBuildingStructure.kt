@@ -18,9 +18,9 @@ enum class FactoryBuildingStructure(
         private val y: Double,
         private val z: Double
     ) {
-        ONE(0.0, 3.0, 0.0),
-        THREE(1.5, 3.0, 1.5),
-        FIVE(2.5, 3.0, 2.5);
+        ONE(0.0, 2.0, 0.0),
+        THREE(1.5, 2.0, 1.5),
+        FIVE(2.5, 2.0, 2.5);
 
         fun toBoundingBox(center: Location): BoundingBox {
             return BoundingBox.of(center.toCenterLocation(), x, y, z)

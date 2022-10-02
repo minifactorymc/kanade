@@ -1,16 +1,16 @@
 package me.tech.listeners
 
-import me.tech.Kanade
 import me.tech.factory.FactoryManagerImpl
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.requests.profile.SaveProfileInfoRequest
 import me.tech.profile.ProfileManagerImpl
 import me.tech.servicecore.isFailure
 import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.plugin.java.JavaPlugin
 
 class PlayerQuitListener(
     private val profileManager: ProfileManagerImpl,
@@ -32,6 +32,9 @@ class PlayerQuitListener(
         // TODO: 9/29/2022 tmp
         val f = factories[profile.lastFactory]!!
         factoryManager.save(f)
+
+        // TODO: 10/1/2022 make this work lol
+        f.plot.clearPlot()
 
         factoryManager.remove(profile.lastFactory!!)
 

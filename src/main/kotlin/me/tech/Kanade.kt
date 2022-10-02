@@ -4,15 +4,17 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
+import me.tech.anya.Translator
+import me.tech.anya.getLanguageProviderRegistration
 import me.tech.commands.admin.GenerateTestItemCommand
 import me.tech.commands.admin.LoadFactoryFromIdCommand
 import me.tech.commands.admin.PreGeneratePlotSetsCommand
+import me.tech.commands.admin.SaveNewStructureCommand
 import me.tech.factory.FactoryManagerImpl
 import me.tech.listeners.BlockPlaceListener
 import me.tech.listeners.PlayerConnectListener
 import me.tech.listeners.PlayerJoinListener
 import me.tech.listeners.PlayerQuitListener
-import me.tech.listeners.admin.BuildingWandListener
 import me.tech.mizuhara.MinifactoryAPI
 import me.tech.mizuhara.models.requests.profile.SaveProfileInfoRequest
 import me.tech.profile.ProfileManagerImpl
@@ -24,11 +26,23 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 class Kanade : SuspendingJavaPlugin() {
+    lateinit var translator: Translator
+        private set
+
     lateinit var profileManager: ProfileManagerImpl
         private set
 
     lateinit var factoryManager: FactoryManagerImpl
         private set
+
+    override suspend fun onLoadAsync() {
+        translator = Translator(
+            mm,
+            getLanguageProviderRegistration(server.servicesManager)
+        )
+
+        translator.loadMessages(this)
+    }
 
     override suspend fun onEnableAsync() {
         profileManager = ProfileManagerImpl()
@@ -66,6 +80,7 @@ class Kanade : SuspendingJavaPlugin() {
         getCommand("generatetestitem")?.setExecutor(GenerateTestItemCommand())
         getCommand("loadfactoryfromid")?.setSuspendingExecutor(LoadFactoryFromIdCommand(this))
         getCommand("pregenerateplotsets")?.setSuspendingExecutor(PreGeneratePlotSetsCommand())
+        getCommand("savenewstructure")?.setExecutor(SaveNewStructureCommand(this))
 
         listOf(
             PlayerJoinListener(profileManager, factoryManager),
@@ -76,8 +91,7 @@ class Kanade : SuspendingJavaPlugin() {
 
         listOf(
             PlayerConnectListener(profileManager),
-            BlockPlaceListener(profileManager, factoryManager),
-            BuildingWandListener(this)
+            BlockPlaceListener(profileManager, factoryManager)
         ).forEach {
             server.pluginManager.registerEvents(it, this)
         }
