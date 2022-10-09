@@ -5,8 +5,8 @@ import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation
 import me.tech.Kanade
 import me.tech.factory.FactoryImpl
 import me.tech.factory.plot.buildings.createBuildingInstance
-import me.tech.kanade.factory.building.FactoryBuildingStructure
-import me.tech.kanade.factory.building.StructureLoadResult
+import me.tech.kanade.factory.building.structure.FactoryBuildingStructure
+import me.tech.kanade.factory.building.structure.StructureLoadResult
 import me.tech.kanade.utils.toCoordinates
 import me.tech.kanade.utils.toLocation
 import me.tech.mizuhara.MinifactoryAPI
@@ -14,6 +14,7 @@ import me.tech.mizuhara.models.Coordinates
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotBuildingDocument
 import me.tech.mizuhara.models.mongo.factory.plot.FactoryPlotDocument
 import me.tech.mizuhara.models.requests.factory.plot.SavePlotRequest
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.WorldCreator
@@ -74,7 +75,7 @@ class FactoryPlotManager {
                 .subtract(plot.center)
 
             FactoryPlotBuildingDocument(
-                building.structureId,
+                building.buildingId,
                 positionRelativeToCenter.toCoordinates(),
                 building.facing.name.uppercase()
             )
@@ -93,7 +94,7 @@ class FactoryPlotManager {
         force: Boolean = false
     ): StructureLoadResult {
         // Internal use only.
-        if(structure.structureId.equals("imaginary", true)) {
+        if(structure.structureFile.equals("imaginary", true)) {
             return StructureLoadResult.EXCEPTION
         }
 
@@ -101,9 +102,9 @@ class FactoryPlotManager {
 
         // TODO: 10/1/2022 buildings can still sometimes overlap, fix eventually.
         if(!force) {
-            if(location.y > plot.center.y) {
-                return StructureLoadResult.OUTSIDE_PLOT
-            }
+//            if(location.y > plot.center.y) {
+//                return StructureLoadResult.OUTSIDE_PLOT
+//            }
 
             if(!plot.boundingBox.contains(structureBoundingBox)) {
                 return StructureLoadResult.OUTSIDE_PLOT
@@ -130,9 +131,9 @@ class FactoryPlotManager {
 
         structureLoader
             .rotation(rotation)
-            .at(location.clone().add(offset.x, offset.y, offset.z))
+            .at(location.clone().toCenterLocation().add(offset.x, offset.y, offset.z)) // TODO: 10/3/2022 fix offset with new bounds
             // TODO: 9/29/2022 Cache the files so we dont need to keep creating an inst.
-            .loadFromFile(File(dataFolder, "structures/buildings/${structure.structureId}"))
+            .loadFromFile(File(dataFolder, "structures/buildings/${structure.structureFile}"))
             .onException { throwable ->
                 throwable.printStackTrace()
             }

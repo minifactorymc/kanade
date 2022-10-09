@@ -1,4 +1,4 @@
-package me.tech.kanade.factory.building
+package me.tech.kanade.factory.building.structure
 
 enum class StructureLoadResult {
     OUTSIDE_PLOT,

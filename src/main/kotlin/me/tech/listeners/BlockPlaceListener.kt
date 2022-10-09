@@ -1,11 +1,10 @@
 package me.tech.listeners
 
 import me.tech.factory.FactoryManagerImpl
-import me.tech.kanade.factory.building.StructureLoadResult
+import me.tech.kanade.factory.building.structure.StructureLoadResult
 import me.tech.kanade.utils.buildingId
 import me.tech.profile.ProfileManagerImpl
 import me.tech.utils.cardinalDirection
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
@@ -24,13 +23,18 @@ class BlockPlaceListener(
     fun onBlockPlace(ev: BlockPlaceEvent) {
         val player = ev.player
 
+        val buildingId = ev.itemInHand.buildingId
+            ?: return
+
+        if(!ev.block.location.clone().subtract(0.0, 1.0, 0.0).block.isSolid) {
+            ev.isCancelled = true
+            return
+        }
+
         val profile = profiles[player.uniqueId]
             ?: throw NullPointerException("profile is null.")
 
         val factory = factories[profile.activeFactory]
-            ?: return
-
-        val buildingId = ev.itemInHand.buildingId
             ?: return
 
         val result: StructureLoadResult = try {

@@ -1,26 +1,26 @@
 package me.tech.kanade.factory.building
 
-import me.tech.kanade.factory.building.item.FactoryPlotItem
+import me.tech.kanade.factory.building.structure.FactoryBuildingStructure
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.block.BlockFace
 import org.bukkit.util.BoundingBox
 
 abstract class FactoryBuilding(
-    val structureId: String,
+    val buildingId: String,
     val position: Coordinates,
-    val connections: FactoryBuildingConnections,
     val facing: BlockFace
 ) {
-    val structure: FactoryBuildingStructure
-        get() = FactoryBuildingStructure.valueOf(structureId.uppercase())
+    val nextConnection = Coordinates(
+        position.x.plus(facing.modX),
+        position.y,
+        position.z.plus(facing.modZ)
+    )
 
-    val structureBounds: FactoryBuildingStructure.Bounds
+    val structure: FactoryBuildingStructure
+        get() = FactoryBuildingStructure.valueOf(buildingId.uppercase())
+
+    val structureBounds: FactoryBuildingStructure.NewBounds
         get() = structure.bounds
 
     lateinit var boundingBox: BoundingBox
-
-    var carriedItem: FactoryPlotItem? = null
-
-    val allowItemIntake: Boolean
-        get() = carriedItem == null
 }

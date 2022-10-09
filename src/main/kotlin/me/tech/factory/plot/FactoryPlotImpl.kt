@@ -3,8 +3,8 @@ package me.tech.factory.plot
 import me.tech.factory.plot.buildings.ImaginaryConveyor
 import me.tech.factory.plot.buildings.getImaginaryConveyorLocations
 import me.tech.kanade.factory.building.FactoryBuilding
-import me.tech.kanade.factory.building.FactoryBuildingConnections
-import me.tech.kanade.factory.building.types.FactoryBuildingMovable
+import me.tech.kanade.factory.building.FactoryBuildingTickable
+import me.tech.kanade.factory.building.types.conveyor.FactoryBuildingConveyor
 import me.tech.kanade.factory.plot.FactoryPlot
 import me.tech.kanade.factory.plot.FactoryPlotPosition
 import me.tech.kanade.utils.toCoordinates
@@ -48,13 +48,13 @@ class FactoryPlotImpl(
     // TODO: 10/2/2022 I converted the private fields to sets and just turn them
     // into maps, need to still test the performance of this.
 
-    private val _buildings = mutableListOf<FactoryBuilding>()
+    private val _buildings = mutableMapOf<Coordinates, FactoryBuilding>()
     val buildings: Map<Coordinates, FactoryBuilding>
-        get() = _buildings.associateBy { it.position }
+        get() = Collections.unmodifiableMap(_buildings)
 
-    private val _imaginaryConveyors = mutableListOf<ImaginaryConveyor>()
+    private val _imaginaryConveyors = mutableMapOf<Coordinates, ImaginaryConveyor>()
     val imaginaryConveyors: Map<Coordinates, ImaginaryConveyor>
-        get() = _imaginaryConveyors.associateBy { it.position }
+        get() = Collections.unmodifiableMap(_imaginaryConveyors)
 
     val allBuildings: Map<Coordinates, FactoryBuilding>
         get() = buildings + imaginaryConveyors
@@ -65,9 +65,9 @@ class FactoryPlotImpl(
     var tickable = false
 
     fun addBuildingInstance(building: FactoryBuilding) {
-        _buildings.add(building)
+        _buildings[building.position] = building
 
-        if(building is FactoryBuildingMovable) {
+        if(building is FactoryBuildingConveyor) {
             setupImaginaryConveyors(building)
         }
     }
@@ -77,34 +77,37 @@ class FactoryPlotImpl(
     }
 
     fun removeBuildingInstance(building: FactoryBuilding) {
-        removeImaginaryConveyors(building)
-        _buildings.remove(building)
-//        _buildings.values.removeIf { it == building }
+        if(building is FactoryBuildingConveyor) {
+            removeImaginaryConveyors(building)
+        }
+        _buildings.values.removeIf { it == building }
     }
 
-    private fun setupImaginaryConveyors(building: FactoryBuilding) {
+    private fun setupImaginaryConveyors(building: FactoryBuildingConveyor) {
         val bounds = building.structureBounds
         val location = building.position.toLocation(plotsWorld)
         val facing = building.facing
-        val ticksToMove = (building as FactoryBuildingMovable).ticksToMove
+        val ticksToMove = building.ticksToMove
 
-        getImaginaryConveyorLocations(bounds, location, facing).forEach {
-            _imaginaryConveyors.add(ImaginaryConveyor(
+        getImaginaryConveyorLocations(bounds, location, facing, building.nextYOffset != 0.0).forEach {
+            _imaginaryConveyors[it.toCoordinates()] = ImaginaryConveyor(
                 it.toCoordinates(),
-                FactoryBuildingConnections.fromLocation(it, facing),
                 facing,
-                ticksToMove
-            ))
+                ticksToMove,
+                building.allowHorizontalIntake,
+                building.allowVerticalIntake,
+                building.nextYOffset
+            )
         }
     }
 
-    private fun removeImaginaryConveyors(building: FactoryBuilding) {
+    private fun removeImaginaryConveyors(building: FactoryBuildingConveyor) {
         val bounds = building.structureBounds
         val location = building.position.toLocation(plotsWorld)
         val facing = building.facing
 
-        getImaginaryConveyorLocations(bounds, location, facing).forEach {
-            _imaginaryConveyors.remove(imaginaryConveyors[it.toCoordinates()])
+        getImaginaryConveyorLocations(bounds, location, facing, building.nextYOffset != 0.0).forEach {
+            _imaginaryConveyors.remove(it.toCoordinates())
         }
     }
 
@@ -114,15 +117,21 @@ class FactoryPlotImpl(
         }
 
         for(building in allBuildings.values) {
-            // Don't tick buildings that don't have items.
-            val item = building.carriedItem
-                ?: continue
+            if(building !is FactoryBuildingTickable) {
+                continue
+            }
 
-            if(building is FactoryBuildingMovable) {
-                val nextBuilding = allBuildings[building.connections.next]
+            if(building is FactoryBuildingConveyor) {
+                val item = building.carriedItem
+                if(item != null) {
+                    val nextPosition = building.nextConnection.copy()
+                    nextPosition.y += building.nextYOffset
 
-                if(nextBuilding != null) {
-                    building.moveItemToNext(building, nextBuilding, item)
+                    val nextBuilding = allBuildings[nextPosition]
+
+                    if(nextBuilding != null) {
+                        building.moveItemToNext(building, nextBuilding, item)
+                    }
                 }
             }
         }

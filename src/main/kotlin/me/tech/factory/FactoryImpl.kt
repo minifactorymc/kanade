@@ -19,8 +19,7 @@ class FactoryImpl(
         get() = plot.boundingBox
 
     override fun tick() {
-        val t = measureTimeMillis {  plot.tickBuildings() }
-        println("Tick took $t")
+        plot.tickBuildings()
     }
 
     // TODO: 9/30/2022 check if plot is open etc, this method will be used

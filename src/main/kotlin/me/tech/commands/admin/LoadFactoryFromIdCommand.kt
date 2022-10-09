@@ -2,15 +2,9 @@ package me.tech.commands.admin
 
 import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
 import me.tech.Kanade
-import me.tech.azusa.toId
-import me.tech.mizuhara.MinifactoryAPI
-import me.tech.mizuhara.models.mongo.factory.FactoryDocument
-import org.bson.types.ObjectId
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.util.BoundingBox
 
 class LoadFactoryFromIdCommand(
     private val plugin: Kanade
@@ -51,7 +45,7 @@ class LoadFactoryFromIdCommand(
         }
 
         factory.plot.allBuildings.forEach { (t, building) ->
-            sender.sendMessage("Bounds = ${building.structureId} // Pos = ${building.position}")
+            sender.sendMessage("Bounds = ${building.buildingId} // Pos = ${building.position}")
         }
 
 //        sender.sendMessage(factory.boundingBox.toString())

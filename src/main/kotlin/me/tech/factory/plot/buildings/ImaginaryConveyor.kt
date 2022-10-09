@@ -1,19 +1,21 @@
 package me.tech.factory.plot.buildings
 
-import me.tech.kanade.factory.building.FactoryBuilding
-import me.tech.kanade.factory.building.FactoryBuildingConnections
-import me.tech.kanade.factory.building.types.FactoryBuildingMovable
+import me.tech.kanade.factory.building.types.conveyor.FactoryBuildingConveyor
 import me.tech.mizuhara.models.Coordinates
 import org.bukkit.block.BlockFace
 
+/**
+ * Represents a non-existent conveyor belt which is only used
+ * to move items along by creating a fake conveyor belt.
+ * @internal Please do not use this under any circumstance.
+ */
 class ImaginaryConveyor(
     position: Coordinates,
-    connections: FactoryBuildingConnections,
     facing: BlockFace,
-    override val ticksToMove: Int
-) : FactoryBuilding(
-    "imaginary",
-    position, connections, facing
-), FactoryBuildingMovable {
-    override var currentTick: Int = 0
-}
+    ticksToMove: Int,
+    override val allowHorizontalIntake: Boolean,
+    override val allowVerticalIntake: Boolean,
+    nextYOffset: Double
+): FactoryBuildingConveyor(
+    "imaginary", position, facing, ticksToMove, allowHorizontalIntake, allowVerticalIntake, nextYOffset
+)
